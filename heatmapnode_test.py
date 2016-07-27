@@ -7,8 +7,7 @@ player.loadPlugin('heatmap')
 
 class HeatMapDiv(app.MainDiv):
     def onInit(self):
-        self.matrix_node = heatmap.HeatMapNode(parent=self, size=self.size)
-        print self.matrix_node
+        self.matrix_node = heatmap.HeatMapNode(parent=self, size=self.size, info="Initial Info")
         print self.matrix_node.info
 
 resolution = avg.Point2D(800,600)
