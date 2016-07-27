@@ -76,8 +76,9 @@ void HeatMapNode::preRender(const VertexArrayPtr& pVA, bool bIsParentActive, flo
 
 void HeatMapNode::render(GLContext* pContext, const glm::mat4& transform)
 {
-    blt32(pContext, transform);
-    cout << "HeatMapNode rendered" << endl;
+    //blt32(pContext, transform);
+    glClearColor(130.f, 205.f, 55.f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void HeatMapNode::setInfo(const avg::UTF8String& info)
