@@ -25,15 +25,15 @@ BOOST_PYTHON_MODULE(heatmap)
 AVG_PLUGIN_API PyObject* registerPlugin()
 {
   HeatMapNode::registerType();
+  
+#if PY_MAJOR_VERSION < 3
   initheatmap();
   PyObject* pyHeatMapModule = PyImport_ImportModule("heatmap");
+#else
+  PyObject* pyHeatMapModule = PyInit_heatmap();
+#endif
+
   return pyHeatMapModule;
-// #if PY_MAJOR_VERSION < 3
-//   initheatmap();
-//   PyObject* pyHeatMapModule = PyImport_ImportModule("heatmap");
-// #else
-//   PyObject* pyHeatMapModule = PyInit_heatmap();
-// #endif
 }
 
 #endif
