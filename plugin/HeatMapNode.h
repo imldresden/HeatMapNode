@@ -32,9 +32,6 @@ class HeatMapNode: public avg::RasterNode
                     void  setInfo(const avg::UTF8String& info);
   const avg::UTF8String&  getInfo() const;
 
-
-
-
   private:
          avg::UTF8String  m_Info;
        avg::MCTexturePtr  m_pTex;
