@@ -27,9 +27,9 @@ class HeatMapNode: public avg::RasterNode
                                                HeatMapNode(const avg::ArgList& args, const std::string& sPublisherName="Node");
                                       virtual  ~HeatMapNode();
                                  virtual void  connectDisplay();
-                                 virtual void  connect(avg::CanvasPtr pCanvas);
+                                 virtual void  connect(avg::CanvasPtr);
                                  virtual void  disconnect(bool bKill);
-                                 virtual void  preRender(const avg::VertexArrayPtr& pVA, bool bIsParentActive, float     parentEffectiveOpacity);
+                                 virtual void  preRender(const avg::VertexArrayPtr&, bool, float);
                                  virtual void  render(avg::GLContext* pContext, const glm::mat4& transform);
 
                                          // node attribute methods
