@@ -165,7 +165,6 @@ const float& HeatMapNode::getValueRangeMax() const
     return m_ValueRangeMax;
 }
 
-
 void HeatMapNode::setValueRangeMin(const float& valuerangemin)
 {
     m_ValueRangeMin = valuerangemin;
