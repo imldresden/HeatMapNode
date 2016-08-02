@@ -64,10 +64,13 @@ void HeatMapNode::connect(CanvasPtr pCanvas)
 
 void HeatMapNode::connectDisplay()
 {
-    m_pTex = GLContextManager::get()->createTexture(m_Size, R8G8B8A8, getMipmap());
-    getSurface()->create(R8G8B8A8, m_pTex);
-    setupFX();
-    RasterNode::connectDisplay();
+    if (m_Matrix.size() != 0)
+    {
+        m_pTex = GLContextManager::get()->createTexture(glm::vec2(16,16), R8G8B8A8, getMipmap());
+        getSurface()->create(R8G8B8A8, m_pTex);
+        setupFX();
+        RasterNode::connectDisplay();
+    }
 }
 
 void HeatMapNode::disconnect(bool bKill)
@@ -78,35 +81,36 @@ void HeatMapNode::disconnect(bool bKill)
 static ProfilingZoneID PrerenderProfilingZone("HeatMapNode::prerender");
 void HeatMapNode::preRender(const VertexArrayPtr& pVA, bool bIsParentActive, float parentEffectiveOpacity)
 {
-    ScopeTimer timer(PrerenderProfilingZone);
-    AreaNode::preRender(pVA, bIsParentActive, parentEffectiveOpacity);
+    if (m_pTex)
+    {
+        ScopeTimer timer(PrerenderProfilingZone);
+        AreaNode::preRender(pVA, bIsParentActive, parentEffectiveOpacity);
 
-    BitmapPtr pBmp(new Bitmap(m_Size, R8G8B8A8));
+        BitmapPtr pBmp(new Bitmap(glm::vec2(m_Matrix.size(),m_Matrix.front().size()), R8G8B8A8));
 
-    int Stride = pBmp->getStride()/pBmp->getBytesPerPixel();
-    IntPoint size = pBmp->getSize();
-    Pixel32 * pLine = (Pixel32*)(pBmp->getPixels());
-    Pixel32 * pPixel;
-    for (int y=0; y<size.y; ++y) {
-        pPixel = pLine;
-        for (int x=0; x<size.x; ++x) {
-            if (x % 2 == 0 || x % 3 == 0 || x % 5 == 0)
-            {
-                *pPixel = avg::Pixel32(54,183,19,255);
-            } else
-            {
-                *pPixel = avg::Pixel32(255,128,0,255);
+        int Stride = pBmp->getStride()/pBmp->getBytesPerPixel();
+        IntPoint size = pBmp->getSize();
+        Pixel32 * pLine = (Pixel32*)(pBmp->getPixels());
+        Pixel32 * pPixel;
+        for (int y=0; y<size.y; ++y) {
+            pPixel = pLine;
+            for (int x=0; x<size.x; ++x) {
+                if (x % 2 == 0 || x % 3 == 0 || x % 5 == 0)
+                {
+                    *pPixel = avg::Pixel32(54,183,19,255);
+                } else
+                {
+                    *pPixel = avg::Pixel32(255,128,0,255);
+                }
+
+                pPixel++;
             }
-
-            pPixel++;
+            pLine += Stride;
         }
-        pLine += Stride;
+        GLContextManager::get()->scheduleTexUpload(m_pTex, pBmp);
+        scheduleFXRender();
+        calcVertexArray(pVA);
     }
-
-    GLContextManager::get()->scheduleTexUpload(m_pTex, pBmp);
-    scheduleFXRender();
-
-    calcVertexArray(pVA);
 }
 
 static ProfilingZoneID RenderProfilingZone("HeatMapNode::render");
@@ -189,11 +193,13 @@ void HeatMapNode::setPosns(const std::vector<glm::vec2>& posns)
 
 void HeatMapNode::setMatrix(const vector<vector<float> >& matrix)
 {
-    // for (int i = 0; i < matrix.size(); i++) {
-    //   for(int j = 0; j < matrix[i].size(); j++) {
-    //     cout << matrix[i][j] << endl;
-    //   }
-    // }
-
     m_Matrix = matrix;
+
+    if (!m_pTex && m_Matrix.size() != 0)
+    {
+        m_pTex = GLContextManager::get()->createTexture(glm::vec2(m_Matrix.size(),m_Matrix.front().size()), R8G8B8A8, getMipmap());
+        getSurface()->create(R8G8B8A8, m_pTex);
+        setupFX();
+        RasterNode::connectDisplay();
+    }
 }
