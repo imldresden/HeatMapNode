@@ -63,6 +63,7 @@ class HeatMapNode: public avg::RasterNode
                                  float  m_ValueRangeMin;
                                  float  m_ValueRangeMax;
               std::vector<std::string>  m_ColorMap;
+      std::vector<std::vector<float> >  m_Matrix;
 };
 
 typedef boost::shared_ptr<HeatMapNode> HeatMapNodePtr;
