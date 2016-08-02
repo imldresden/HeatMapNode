@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from libavg import avg, app, player
+import large_data as LD
 
 player.loadPlugin('heatmap')
 
@@ -41,23 +42,23 @@ class HeatMapDiv(app.MainDiv):
             id="blur_test",
             autorender=True,
             multisamplesamples=1,
-            size=(256,256)
+            size=(1920,1080)
         )
         self.blur_node = self.blur_canvas.getRootNode()
 
         self.heatmap_node = heatmap.HeatMapNode(
             parent=self.blur_node,
-            size=(256,256),
+            size=(1920,1080),
             viewportrangemin=(0,0),
             viewportrangemax=(1,1),
             mapsize=(10,10),
-            valuerangemin=1.0,
-            valuerangemax=16.0,
+            valuerangemin=-8.9,
+            valuerangemax=8.3,
             colormap=cm
         )
         self.heatmap_node.setMatrix(matrix)
 
-        self.blur_FX = avg.BlurFXNode(0.3)
+        self.blur_FX = avg.BlurFXNode(2)
         self.heatmap_node.setEffect(self.blur_FX)
         #
         avg.ImageNode(
@@ -69,6 +70,6 @@ class HeatMapDiv(app.MainDiv):
 
         # print (self.heatmap_node.viewportrangemin, self.heatmap_node.viewportrangemax, self.heatmap_node.mapsize, self.heatmap_node.valuerangemin, self.heatmap_node.valuerangemax, self.heatmap_node.colormap)
 
-resolution = avg.Point2D(1024,720)
+resolution = avg.Point2D(1920,1080)
 resolutionStr = str(resolution.x) + ", " + str(resolution.y)
 app.App().run(HeatMapDiv(), app_resolution=resolutionStr)
