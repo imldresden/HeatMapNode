@@ -240,7 +240,7 @@ void HeatMapNode::createColorRange(const float& min, const float& max)
 
     for (int i=0; i < m_ColorMap.size(); ++i)
     {
-      float v = min + (i*range_steps);
-      m_ColorMapping[v] = Color(m_ColorMap.at(i));
+      float v = max - (i*range_steps);
+      m_ColorMapping[v] = Color(m_ColorMap.at( (m_ColorMap.size()-1) - i));
     }
 }
