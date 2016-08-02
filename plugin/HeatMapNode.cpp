@@ -82,6 +82,27 @@ void HeatMapNode::preRender(const VertexArrayPtr& pVA, bool bIsParentActive, flo
     AreaNode::preRender(pVA, bIsParentActive, parentEffectiveOpacity);
 
     BitmapPtr pBmp(new Bitmap(m_Size, R8G8B8A8));
+
+    int Stride = pBmp->getStride()/pBmp->getBytesPerPixel();
+    IntPoint size = pBmp->getSize();
+    Pixel32 * pLine = (Pixel32*)(pBmp->getPixels());
+    Pixel32 * pPixel;
+    for (int y=0; y<size.y; ++y) {
+        pPixel = pLine;
+        for (int x=0; x<size.x; ++x) {
+            if (x % 2 == 0 || x % 3 == 0 || x % 5 == 0)
+            {
+                *pPixel = avg::Pixel32(54,183,19,255);
+            } else
+            {
+                *pPixel = avg::Pixel32(255,128,0,255);
+            }
+
+            pPixel++;
+        }
+        pLine += Stride;
+    }
+
     GLContextManager::get()->scheduleTexUpload(m_pTex, pBmp);
     scheduleFXRender();
 
@@ -168,9 +189,11 @@ void HeatMapNode::setPosns(const std::vector<glm::vec2>& posns)
 
 void HeatMapNode::setMatrix(const vector<vector<float> >& matrix)
 {
-    for (int i = 0; i < matrix.size(); i++) {
-      for(int j = 0; j < matrix[i].size(); j++) {
-        cout << matrix[i][j] << endl;
-      }
-    }
+    // for (int i = 0; i < matrix.size(); i++) {
+    //   for(int j = 0; j < matrix[i].size(); j++) {
+    //     cout << matrix[i][j] << endl;
+    //   }
+    // }
+
+    m_Matrix = matrix;
 }
