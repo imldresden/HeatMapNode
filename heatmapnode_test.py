@@ -30,7 +30,12 @@ class HeatMapDiv(app.MainDiv):
             [1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0,16.0]
         ]
 
-        cm = ["00b159","d11141","ffc425","2b91a9","f7c8f9","720707","403f3f","4dfffe"]
+        cm = [
+            "040ED8","2050FF","4196FF","6DC1FF",
+            "86D9FF","9CEEFF","AFF5FF","CEFFFF",
+            "FFFE47","FFEB00","FFC400","FF9000",
+            "FF4800","FF0000","D50000","9E0000"
+        ]
 
         self.blur_canvas = player.createCanvas(
             id="blur_test",
@@ -46,8 +51,8 @@ class HeatMapDiv(app.MainDiv):
             viewportrangemin=(0,0),
             viewportrangemax=(1,1),
             mapsize=(10,10),
-            valuerangemin=0.0,
-            valuerangemax=50.0,
+            valuerangemin=1.0,
+            valuerangemax=16.0,
             colormap=cm
         )
         self.heatmap_node.setMatrix(matrix)
