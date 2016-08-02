@@ -17,6 +17,7 @@
 #include <graphics/Filterfill.h>
 #include <graphics/Bitmap.h>
 #include <graphics/FilterResizeBilinear.h>
+#include <graphics/Color.h>
 #include <player/Player.h>
 #include <player/Arg.h>
 #include <player/TypeDefinition.h>
@@ -50,6 +51,7 @@ HeatMapNode::HeatMapNode(const ArgList& args, const string& sPublisherName) : Ra
 {
     args.setMembers(this);
     setSize(args.getArgVal<glm::vec2>("size"));
+    createColorRange(m_ValueRangeMin, m_ValueRangeMax);
 }
 
 HeatMapNode::~HeatMapNode()
@@ -95,14 +97,30 @@ void HeatMapNode::preRender(const VertexArrayPtr& pVA, bool bIsParentActive, flo
         for (int y=0; y<size.y; ++y) {
             pPixel = pLine;
             for (int x=0; x<size.x; ++x) {
-                if (x % 2 == 0 || x % 3 == 0 || x % 5 == 0)
-                {
-                    *pPixel = avg::Pixel32(54,183,19,255);
-                } else
-                {
-                    *pPixel = avg::Pixel32(255,128,0,255);
+                // cout << m_Matrix[x][y] << endl;
+                //
+                // cout << m_ColorMapping[14] << endl;
+                //
+                avg::Pixel32 c;
+                std::map<float, avg::Pixel32>::iterator low, prev;
+                double pos = m_Matrix[x][y];
+                low = m_ColorMapping.lower_bound(pos);
+                if (low == m_ColorMapping.end()) {
+                    // nothing found
+                    // throw Exception(AVG_ERR_OUT_OF_RANGE, "No matching value in colormap found, do you provided the correct range?");
+                } else if (low == m_ColorMapping.begin()) {
+                    c = m_ColorMapping[low->first];
+                } else {
+                    prev = low;
+                    --prev;
+                    if ((pos - prev->first) < (low->first - pos)) {
+                        c = m_ColorMapping[prev->first];
+                    } else {
+                        c = m_ColorMapping[low->first];
+                    }
                 }
-
+                //
+                *pPixel = c;
                 pPixel++;
             }
             pLine += Stride;
@@ -200,5 +218,15 @@ void HeatMapNode::setMatrix(const vector<vector<float> >& matrix)
         getSurface()->create(R8G8B8A8, m_pTex);
         setupFX();
         RasterNode::connectDisplay();
+    }
+}
+
+void HeatMapNode::createColorRange(const float& min, const float& max)
+{
+    for (int i=0; i<m_ColorMap.size(); ++i)
+    {
+      float v = (max/m_ColorMap.size())*i;
+      cout << v << " # " << m_ColorMap.at(i) << endl;
+      m_ColorMapping[v] = Color(m_ColorMap.at(i));
     }
 }
