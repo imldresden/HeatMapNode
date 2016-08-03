@@ -31,6 +31,8 @@ using namespace boost;
 using namespace std;
 using namespace avg;
 
+bool SHOULD_PRERENDER = false;
+
 void HeatMapNode::registerType()
 {
     vector<string> cm;
@@ -83,7 +85,7 @@ void HeatMapNode::disconnect(bool bKill)
 static ProfilingZoneID PrerenderProfilingZone("HeatMapNode::prerender");
 void HeatMapNode::preRender(const VertexArrayPtr& pVA, bool bIsParentActive, float parentEffectiveOpacity)
 {
-    if (m_pTex)
+    if (m_pTex && SHOULD_PRERENDER)
     {
         ScopeTimer timer(PrerenderProfilingZone);
         AreaNode::preRender(pVA, bIsParentActive, parentEffectiveOpacity);
@@ -97,17 +99,12 @@ void HeatMapNode::preRender(const VertexArrayPtr& pVA, bool bIsParentActive, flo
         for (int y=0; y<size.y; ++y) {
             pPixel = pLine;
             for (int x=0; x<size.x; ++x) {
-                // cout << m_Matrix[x][y] << endl;
-                //
-                // cout << m_ColorMapping[14] << endl;
-                //
                 avg::Pixel32 c;
                 std::map<float, avg::Pixel32>::iterator low, prev;
                 double pos = m_Matrix[x][y];
                 low = m_ColorMapping.lower_bound(pos);
                 if (low == m_ColorMapping.end()) {
                     // nothing found
-                    // throw Exception(AVG_ERR_OUT_OF_RANGE, "No matching value in colormap found, do you provided the correct range?");
                 } else if (low == m_ColorMapping.begin()) {
                     c = m_ColorMapping[low->first];
                 } else {
@@ -119,7 +116,6 @@ void HeatMapNode::preRender(const VertexArrayPtr& pVA, bool bIsParentActive, flo
                         c = m_ColorMapping[low->first];
                     }
                 }
-                //
                 *pPixel = c;
                 pPixel++;
             }
@@ -128,6 +124,8 @@ void HeatMapNode::preRender(const VertexArrayPtr& pVA, bool bIsParentActive, flo
         GLContextManager::get()->scheduleTexUpload(m_pTex, pBmp);
         scheduleFXRender();
         calcVertexArray(pVA);
+
+        SHOULD_PRERENDER = false;
     }
 }
 
@@ -206,6 +204,7 @@ void HeatMapNode::setColorMap(const vector<string>& colormap)
 void HeatMapNode::setPosns(const std::vector<glm::vec2>& posns)
 {
   cout << "POSNS SET" << endl;
+  SHOULD_PRERENDER = true;
 }
 
 void HeatMapNode::setMatrix(const vector<vector<float> >& matrix)
@@ -219,28 +218,38 @@ void HeatMapNode::setMatrix(const vector<vector<float> >& matrix)
         setupFX();
         RasterNode::connectDisplay();
     }
+
+    SHOULD_PRERENDER = true;
 }
 
 void HeatMapNode::createColorRange(const float& min, const float& max)
 {
     float _min;
     float _max;
+    float goes_over_zero = 0;
+    float is_nonchanging_range = 0;
     if (min < 0)
-        _min = min*(-1);
+        _min = -min;
     else
         _min = min;
 
     if (max < 0)
-        _max = max*(-1);
+        _max = -max;
     else
         _max = max;
 
-    float range_size = _min + _max;
-    float range_steps = range_size / m_ColorMap.size();
+    if (min < 0 && max > 0)
+        goes_over_zero = 1;
+    else
+        is_nonchanging_range = 1;
+
+    float range_size = _min + _max - is_nonchanging_range;
+    float range_steps = range_size / (m_ColorMap.size() - goes_over_zero);
 
     for (int i=0; i < m_ColorMap.size(); ++i)
     {
       float v = max - (i*range_steps);
+      //cout << v << " # " << m_ColorMap.at( (m_ColorMap.size()-1) - i) << endl;
       m_ColorMapping[v] = Color(m_ColorMap.at( (m_ColorMap.size()-1) - i));
     }
 }
