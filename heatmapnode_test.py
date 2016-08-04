@@ -58,14 +58,21 @@ class HeatMapDiv(app.MainDiv):
         )
         self.heatmap_node.setMatrix(LD._matrix)
 
-        self.blur_FX = avg.BlurFXNode(2)
+        self.blur_FX = avg.BlurFXNode(1)
         self.heatmap_node.setEffect(self.blur_FX)
         #
         avg.ImageNode(
             parent=self,
             href="canvas:blur_test",
             pos=(0,0),
-            size=self.size,
+            size=self.size
+        )
+
+        avg.ImageNode(
+            parent=self,
+            href="world.png",
+            pos=(0,0),
+            size=self.size
         )
 
         # print (self.heatmap_node.viewportrangemin, self.heatmap_node.viewportrangemax, self.heatmap_node.mapsize, self.heatmap_node.valuerangemin, self.heatmap_node.valuerangemax, self.heatmap_node.colormap)
