@@ -75,7 +75,7 @@ class HeatMapDiv(app.MainDiv):
             size=self.size
         )
 
-        # print (self.heatmap_node.viewportrangemin, self.heatmap_node.viewportrangemax, self.heatmap_node.mapsize, self.heatmap_node.valuerangemin, self.heatmap_node.valuerangemax, self.heatmap_node.colormap)
+        print self.heatmap_node.colormap
 
 resolution = avg.Point2D(1920,1080)
 resolutionStr = str(resolution.x) + ", " + str(resolution.y)
