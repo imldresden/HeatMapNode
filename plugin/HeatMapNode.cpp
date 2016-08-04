@@ -39,10 +39,7 @@ HeatMapNode::HeatMapNode(const ArgList& args, const string& sPublisherName) : Ra
     createColorRange(m_ValueRangeMin, m_ValueRangeMax);
 }
 
-HeatMapNode::~HeatMapNode()
-{
-    cout << "HeatMapNode destruct" << endl;
-}
+HeatMapNode::~HeatMapNode() {}
 
 void HeatMapNode::connect(CanvasPtr pCanvas)
 {
