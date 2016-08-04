@@ -40,6 +40,7 @@ class HeatMapNode: public avg::RasterNode
                      // basics
                      avg::MCTexturePtr  m_pTex;
                              glm::vec2  m_Size;
+                                 bool  m_ShouldPrerender;
 
                              // member varibales
                              glm::vec2  m_ViewportRangeMin;

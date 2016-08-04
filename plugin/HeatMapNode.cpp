@@ -14,8 +14,6 @@ using namespace boost;
 using namespace std;
 using namespace avg;
 
-bool SHOULD_PRERENDER = false;
-
 void HeatMapNode::registerType()
 {
     vector<string> cm;
@@ -36,6 +34,7 @@ HeatMapNode::HeatMapNode(const ArgList& args, const string& sPublisherName) : Ra
 {
     args.setMembers(this);
     setSize(args.getArgVal<glm::vec2>("size"));
+    m_ShouldPrerender = false;
     createColorRange(m_ValueRangeMin, m_ValueRangeMax);
 }
 
@@ -65,10 +64,11 @@ void HeatMapNode::disconnect(bool bKill)
 static ProfilingZoneID PrerenderProfilingZone("HeatMapNode::prerender");
 void HeatMapNode::preRender(const VertexArrayPtr& pVA, bool bIsParentActive, float parentEffectiveOpacity)
 {
-    if (m_pTex && SHOULD_PRERENDER)
+    AreaNode::preRender(pVA, bIsParentActive, parentEffectiveOpacity);
+    
+    if (m_pTex && m_ShouldPrerender)
     {
         ScopeTimer timer(PrerenderProfilingZone);
-        AreaNode::preRender(pVA, bIsParentActive, parentEffectiveOpacity);
 
         BitmapPtr pBmp(new Bitmap(glm::vec2(m_Matrix.size(),m_Matrix.front().size()), R8G8B8A8));
 
@@ -105,7 +105,7 @@ void HeatMapNode::preRender(const VertexArrayPtr& pVA, bool bIsParentActive, flo
         scheduleFXRender();
         calcVertexArray(pVA);
 
-        SHOULD_PRERENDER = false;
+        m_ShouldPrerender = false;
     }
 }
 
@@ -134,7 +134,7 @@ void HeatMapNode::setColorMap(const vector<string>& colormap)
 void HeatMapNode::setPosns(const std::vector<glm::vec2>& posns)
 {
   cout << "POSNS SET" << endl;
-  SHOULD_PRERENDER = true;
+  m_ShouldPrerender = true;
 }
 
 void HeatMapNode::setMatrix(const vector<vector<float> >& matrix)
@@ -149,7 +149,7 @@ void HeatMapNode::setMatrix(const vector<vector<float> >& matrix)
         RasterNode::connectDisplay();
     }
 
-    SHOULD_PRERENDER = true;
+    m_ShouldPrerender = true;
 }
 
 void HeatMapNode::createColorRange(const float& min, const float& max)
