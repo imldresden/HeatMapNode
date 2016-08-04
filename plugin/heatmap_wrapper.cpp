@@ -17,14 +17,18 @@ char heatMapNodeName[] = "heatmapnode";
 BOOST_PYTHON_MODULE(heatmap)
 {
 
-  // Register interable conversions.
+  // Register interable conversions for vector of vector of float.
   iterable_converter()
     .from_python<std::vector<std::vector<float> > >()
     ;
 
   class_<HeatMapNode, bases<avg::RasterNode>, boost::noncopyable>("HeatMapNode", no_init)
     .def("__init__", raw_constructor(createNode<heatMapNodeName>))
-    .add_property("colormap", make_function(&HeatMapNode::getColorMap, return_value_policy<copy_const_reference>()), &HeatMapNode::setColorMap)
+    .add_property(
+      "colormap",
+      make_function(&HeatMapNode::getColorMap, return_value_policy<copy_const_reference>()),
+      &HeatMapNode::setColorMap
+    )
     .def("setPosns", &HeatMapNode::setPosns)
     .def("setMatrix", &HeatMapNode::setMatrix)
     ;
