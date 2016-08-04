@@ -34,16 +34,6 @@ class HeatMapNode: public avg::RasterNode
 
                                          // node attribute methods
                                          void  setSize(const glm::vec2& pt);
-                             const glm::vec2&  getViewportRangeMin() const;
-                             const glm::vec2&  getViewportRangeMax() const;
-                                         void  setViewportRangeMin(const glm::vec2& viewportrangemin);
-                                         void  setViewportRangeMax(const glm::vec2& viewportrangemin);
-                             const glm::vec2&  getMapSize() const;
-                                         void  setMapSize(const glm::vec2& mapsize);
-                                 const float&  getValueRangeMin() const;
-                                 const float&  getValueRangeMax() const;
-                                         void  setValueRangeMin(const float& valuerangemin);
-                                         void  setValueRangeMax(const float& valuerangemax);
                                          void  setColorMap(const std::vector<std::string>& colormap);
               const std::vector<std::string>&  getColorMap() const;
 
@@ -53,7 +43,6 @@ class HeatMapNode: public avg::RasterNode
     private:
                      // basics
                      avg::MCTexturePtr  m_pTex;
-                                  bool  m_bNewSurface;
                              glm::vec2  m_Size;
 
                              // member varibales

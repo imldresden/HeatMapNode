@@ -141,56 +141,6 @@ void HeatMapNode::setSize(const glm::vec2& pt)
     m_Size = pt;
 }
 
-const glm::vec2& HeatMapNode::getViewportRangeMin() const
-{
-    return m_ViewportRangeMin;
-}
-
-const glm::vec2& HeatMapNode::getViewportRangeMax() const
-{
-    return m_ViewportRangeMax;
-}
-
-void HeatMapNode::setViewportRangeMin(const glm::vec2& viewportrangemin)
-{
-    m_ViewportRangeMin = viewportrangemin;
-}
-
-void HeatMapNode::setViewportRangeMax(const glm::vec2& viewportrangemax)
-{
-    m_ViewportRangeMax = viewportrangemax;
-}
-
-const glm::vec2& HeatMapNode::getMapSize() const
-{
-    return m_MapSize;
-}
-
-void HeatMapNode::setMapSize(const glm::vec2& mapsize)
-{
-    m_MapSize = mapsize;
-}
-
-const float& HeatMapNode::getValueRangeMin() const
-{
-    return m_ValueRangeMin;
-}
-
-const float& HeatMapNode::getValueRangeMax() const
-{
-    return m_ValueRangeMax;
-}
-
-void HeatMapNode::setValueRangeMin(const float& valuerangemin)
-{
-    m_ValueRangeMin = valuerangemin;
-}
-
-void HeatMapNode::setValueRangeMax(const float& valuerangemax)
-{
-    m_ValueRangeMax = valuerangemax;
-}
-
 const vector<string>& HeatMapNode::getColorMap() const
 {
     return m_ColorMap;
