@@ -129,6 +129,8 @@ const vector<string>& HeatMapNode::getColorMap() const
 void HeatMapNode::setColorMap(const vector<string>& colormap)
 {
     m_ColorMap = colormap;
+    createColorRange(m_ValueRangeMin, m_ValueRangeMax);
+    m_ShouldPrerender = true;
 }
 
 void HeatMapNode::setPosns(const std::vector<glm::vec2>& posns)
@@ -139,11 +141,28 @@ void HeatMapNode::setPosns(const std::vector<glm::vec2>& posns)
 
 void HeatMapNode::setMatrix(const vector<vector<float> >& matrix)
 {
+    // change m_pTex if matrix size differs to initial one
+    if (m_pTex && (m_Matrix.size() != matrix.size() || m_Matrix.front().size() != matrix.front().size()))
+    {
+        m_pTex = GLContextManager::get()->createTexture(
+          glm::vec2(matrix.size(),matrix.front().size()),
+          R8G8B8A8,
+          getMipmap()
+        );
+        getSurface()->create(R8G8B8A8, m_pTex);
+        setupFX();
+    }
+
     m_Matrix = matrix;
 
+    // create m_pTex on first setMatrix call
     if (!m_pTex && m_Matrix.size() != 0)
     {
-        m_pTex = GLContextManager::get()->createTexture(glm::vec2(m_Matrix.size(),m_Matrix.front().size()), R8G8B8A8, getMipmap());
+        m_pTex = GLContextManager::get()->createTexture(
+          glm::vec2(m_Matrix.size(),m_Matrix.front().size()),
+          R8G8B8A8,
+          getMipmap()
+        );
         getSurface()->create(R8G8B8A8, m_pTex);
         setupFX();
         RasterNode::connectDisplay();
