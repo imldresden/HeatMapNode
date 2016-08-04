@@ -5,14 +5,10 @@
 #include <api.h>
 
 #include <base/GLMHelper.h>
-#include <base/UTF8String.h>
-#include <base/GLMHelper.h>
 #include <player/RasterNode.h>
 
 #include <boost/python/stl_iterator.hpp>
 #include <boost/shared_ptr.hpp>
-
-#include <string>
 
 namespace avg {
     class MCTexture;
