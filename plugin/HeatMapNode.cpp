@@ -1,31 +1,14 @@
 #include "HeatMapNode.h"
 
-#include <math.h>
-
-#include <base/Exception.h>
-#include <base/StringHelper.h>
 #include <base/ScopeTimer.h>
-#include <base/TimeSource.h>
-#include <base/ThreadHelper.h>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/transform.hpp>
-#include <graphics/StandardShader.h>
-#include <graphics/MCTexture.h>
 #include <graphics/VertexArray.h>
 #include <graphics/GLContextManager.h>
-#include <graphics/Filterfill.h>
 #include <graphics/Bitmap.h>
-#include <graphics/FilterResizeBilinear.h>
 #include <graphics/Color.h>
-#include <player/Player.h>
 #include <player/Arg.h>
 #include <player/TypeDefinition.h>
 #include <player/TypeRegistry.h>
 #include <player/OGLSurface.h>
-
-#include <iostream>
-#include <string>
 
 using namespace boost;
 using namespace std;
