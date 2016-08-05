@@ -34,7 +34,6 @@ void HeatMapNode::registerType()
 HeatMapNode::HeatMapNode(const ArgList& args, const string& sPublisherName) : RasterNode(sPublisherName)
 {
     args.setMembers(this);
-    setSize(args.getArgVal<glm::vec2>("size"));
     m_ShouldPrerender = false;
     createColorRange(m_ValueRangeMin, m_ValueRangeMax);
 }
@@ -126,11 +125,6 @@ void HeatMapNode::render(GLContext* pContext, const glm::mat4& transform)
         ScopeTimer Timer(RenderProfilingZone);
         blt32(pContext, transform);
     }
-}
-
-void HeatMapNode::setSize(const glm::vec2& pt)
-{
-    m_Size = pt;
 }
 
 const vector<string>& HeatMapNode::getColorMap() const

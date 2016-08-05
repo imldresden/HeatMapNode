@@ -29,7 +29,6 @@ class HeatMapNode: public avg::RasterNode
                                  virtual void  render(avg::GLContext* pContext, const glm::mat4& transform);
 
                                          // node attribute methods
-                                         void  setSize(const glm::vec2& pt);
                                          void  setColorMap(const std::vector<std::string>& colormap);
               const std::vector<std::string>&  getColorMap() const;
 
@@ -39,7 +38,6 @@ class HeatMapNode: public avg::RasterNode
     private:
                      // basics
                      avg::MCTexturePtr  m_pTex;
-                             glm::vec2  m_Size;
                                  bool  m_ShouldPrerender;
 
                              // member varibales
