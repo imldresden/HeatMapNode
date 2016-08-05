@@ -5,6 +5,7 @@
 #include <graphics/GLContextManager.h>
 #include <graphics/Bitmap.h>
 #include <graphics/Color.h>
+#include <graphics/MCTexture.h>
 #include <player/Arg.h>
 #include <player/TypeDefinition.h>
 #include <player/TypeRegistry.h>
@@ -47,18 +48,27 @@ void HeatMapNode::connect(CanvasPtr pCanvas)
 
 void HeatMapNode::connectDisplay()
 {
-    if (m_Matrix.size() != 0)
-    {
-        m_pTex = GLContextManager::get()->createTexture(glm::vec2(16,16), R8G8B8A8, getMipmap());
-        getSurface()->create(R8G8B8A8, m_pTex);
-        setupFX();
-        RasterNode::connectDisplay();
+    if (m_Matrix.size() != 0) {
+        setupRender();
     }
+    RasterNode::connectDisplay();
 }
 
 void HeatMapNode::disconnect(bool bKill)
 {
     RasterNode::disconnect(bKill);
+}
+
+glm::ivec2 getMatrixSize(vector<vector<float> > matrix)
+{
+    int ysize = matrix.size();
+    int xsize;
+    if (ysize > 0) {
+        xsize = matrix.front().size();
+    } else {
+        xsize = 0;
+    }
+    return glm::ivec2(xsize, ysize);
 }
 
 static ProfilingZoneID PrerenderProfilingZone("HeatMapNode::prerender");
@@ -70,7 +80,7 @@ void HeatMapNode::preRender(const VertexArrayPtr& pVA, bool bIsParentActive, flo
     {
         ScopeTimer timer(PrerenderProfilingZone);
 
-        BitmapPtr pBmp(new Bitmap(glm::vec2(m_Matrix.size(),m_Matrix.front().size()), R8G8B8A8));
+        BitmapPtr pBmp(new Bitmap(getMatrixSize(m_Matrix), R8G8B8A8));
 
         int Stride = pBmp->getStride()/pBmp->getBytesPerPixel();
         IntPoint size = pBmp->getSize();
@@ -81,7 +91,7 @@ void HeatMapNode::preRender(const VertexArrayPtr& pVA, bool bIsParentActive, flo
             for (int x=0; x<size.x; ++x) {
                 avg::Pixel32 c;
                 std::map<float, avg::Pixel32>::iterator low, prev;
-                double pos = m_Matrix[x][y];
+                double pos = m_Matrix[y][x];
                 low = m_ColorMapping.lower_bound(pos);
                 if (low == m_ColorMapping.end()) {
                     // nothing found
@@ -112,8 +122,10 @@ void HeatMapNode::preRender(const VertexArrayPtr& pVA, bool bIsParentActive, flo
 static ProfilingZoneID RenderProfilingZone("HeatMapNode::render");
 void HeatMapNode::render(GLContext* pContext, const glm::mat4& transform)
 {
-    ScopeTimer Timer(RenderProfilingZone);
-    blt32(pContext, transform);
+    if (m_pTex) {
+        ScopeTimer Timer(RenderProfilingZone);
+        blt32(pContext, transform);
+    }
 }
 
 void HeatMapNode::setSize(const glm::vec2& pt)
@@ -141,33 +153,15 @@ void HeatMapNode::setPosns(const std::vector<glm::vec2>& posns)
 
 void HeatMapNode::setMatrix(const vector<vector<float> >& matrix)
 {
-    // change m_pTex if matrix size differs to initial one
-    if (m_pTex && (m_Matrix.size() != matrix.size() || m_Matrix.front().size() != matrix.front().size()))
-    {
-        m_pTex = GLContextManager::get()->createTexture(
-          glm::vec2(matrix.size(),matrix.front().size()),
-          R8G8B8A8,
-          getMipmap()
-        );
-        getSurface()->create(R8G8B8A8, m_pTex);
-        setupFX();
-    }
-
+    glm::ivec2 oldSize = getMatrixSize(m_Matrix);
     m_Matrix = matrix;
-
-    // create m_pTex on first setMatrix call
-    if (!m_pTex && m_Matrix.size() != 0)
-    {
-        m_pTex = GLContextManager::get()->createTexture(
-          glm::vec2(m_Matrix.size(),m_Matrix.front().size()),
-          R8G8B8A8,
-          getMipmap()
-        );
-        getSurface()->create(R8G8B8A8, m_pTex);
-        setupFX();
-        RasterNode::connectDisplay();
+    if (getState() == NS_CANRENDER) {
+        glm::ivec2 size = getMatrixSize(m_Matrix);
+        // Create new texture if it doesn't exist yet or the size has changed.
+        if (!m_pTex || (m_pTex && oldSize != size)) {
+            setupRender();
+        }
     }
-
     m_ShouldPrerender = true;
 }
 
@@ -200,4 +194,14 @@ void HeatMapNode::createColorRange(const float& min, const float& max)
       float v = max - (i*range_steps);
       m_ColorMapping[v] = Color(m_ColorMap.at( (m_ColorMap.size()-1) - i));
     }
+}
+
+void HeatMapNode::setupRender()
+{
+    glm::ivec2 size = getMatrixSize(m_Matrix);
+    m_pTex = GLContextManager::get()->createTexture(size, R8G8B8A8, getMipmap());
+    getSurface()->create(R8G8B8A8, m_pTex);
+    newSurface();
+    setupFX();
+
 }
