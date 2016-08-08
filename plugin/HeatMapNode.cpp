@@ -93,11 +93,10 @@ void HeatMapNode::preRender(const VertexArrayPtr& pVA, bool bIsParentActive, flo
             for (int x=0; x<size.x; ++x) {
                 avg::Pixel32 c;
                 std::map<float, avg::Pixel32>::iterator low, prev;
-                double pos = m_Matrix[y][x];
+                float pos = m_Matrix[y][x];
+                pos = max(m_ValueRangeMin, min(pos, m_ValueRangeMax-1));
                 low = m_ColorMapping.lower_bound(pos);
-                if (low == m_ColorMapping.end()) {
-                    // nothing found
-                } else if (low == m_ColorMapping.begin()) {
+                if (low == m_ColorMapping.begin()) {
                     c = m_ColorMapping[low->first];
                 } else {
                     prev = low;
@@ -155,6 +154,30 @@ const vector<float>& HeatMapNode::getOpacityMap() const
     return m_OpacityMap;
 }
 
+void HeatMapNode::setValueRangeMin(float min)
+{
+    m_ValueRangeMin = min;
+    createColorRange(m_ValueRangeMin, m_ValueRangeMax);
+    m_ShouldPrerender = true;
+}
+
+float HeatMapNode::getValueRangeMin() const
+{
+    return m_ValueRangeMin;
+}
+
+void HeatMapNode::setValueRangeMax(float max)
+{
+    m_ValueRangeMax = max;
+    createColorRange(m_ValueRangeMin, m_ValueRangeMax);
+    m_ShouldPrerender = true;
+}
+
+float HeatMapNode::getValueRangeMax() const
+{
+    return m_ValueRangeMax;
+}
+
 void HeatMapNode::setPosns(const std::vector<glm::vec2>& posns)
 {
     m_Matrix.clear();
@@ -165,9 +188,7 @@ void HeatMapNode::setPosns(const std::vector<glm::vec2>& posns)
     for (auto pos: posns) {
         glm::vec2 matPos = ((pos - m_ViewportRangeMin)/viewportExtent) * m_MapSize;
         if (matPos.y >= 0 && matPos.y < m_MapSize.y && matPos.x >= 0 && matPos.x < m_MapSize.x) {
-            if (m_Matrix[matPos.y][matPos.x] < m_ValueRangeMax-1) {
-                m_Matrix[matPos.y][matPos.x]++;
-            }
+            m_Matrix[matPos.y][matPos.x]++;
         }
     }
     if (getState() == NS_CANRENDER && !m_pTex) {

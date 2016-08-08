@@ -33,6 +33,10 @@ class HeatMapNode: public avg::RasterNode
               const std::vector<std::string>&  getColorMap() const;
                                          void  setOpacityMap(const std::vector<float>& opacitymap);
                     const std::vector<float>&  getOpacityMap() const;
+                                         void  setValueRangeMin(float min);
+                                        float  getValueRangeMin() const;
+                                         void  setValueRangeMax(float max);
+                                        float  getValueRangeMax() const;
 
                                          // node external methods
                                          void  setPosns(const std::vector<glm::vec2>& posns);
@@ -40,7 +44,7 @@ class HeatMapNode: public avg::RasterNode
     private:
                      // basics
                      avg::MCTexturePtr  m_pTex;
-                                 bool  m_ShouldPrerender;
+                                  bool  m_ShouldPrerender;
 
                              // member varibales
                              glm::vec2  m_ViewportRangeMin;
