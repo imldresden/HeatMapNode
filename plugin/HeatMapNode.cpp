@@ -1,6 +1,7 @@
 #include "HeatMapNode.h"
 
 #include <base/ScopeTimer.h>
+#include <base/Exception.h>
 #include <graphics/VertexArray.h>
 #include <graphics/GLContextManager.h>
 #include <graphics/Bitmap.h>
@@ -18,6 +19,7 @@ using namespace avg;
 void HeatMapNode::registerType()
 {
     vector<string> cm;
+    vector<float> om;
     TypeDefinition def = TypeDefinition("heatmapnode", "rasternode",  ExportedObject::buildObject<HeatMapNode>)
         .addArg( Arg<glm::vec2>("viewportrangemin", glm::vec2(0,0), false, offsetof(HeatMapNode, m_ViewportRangeMin)) )
         .addArg( Arg<glm::vec2>("viewportrangemax", glm::vec2(0,0), false, offsetof(HeatMapNode, m_ViewportRangeMax)) )
@@ -25,6 +27,7 @@ void HeatMapNode::registerType()
         .addArg( Arg<float >("valuerangemin", 0.0, false, offsetof(HeatMapNode, m_ValueRangeMin)) )
         .addArg( Arg<float >("valuerangemax", 0.0, false, offsetof(HeatMapNode, m_ValueRangeMax)) )
         .addArg( Arg<vector<string> >("colormap", cm, false, offsetof(HeatMapNode, m_ColorMap)) )
+        .addArg( Arg<vector<float> >("opacitymap", om, false, offsetof(HeatMapNode, m_OpacityMap)) )
         ;
 
     const char* allowedParentNodeNames[] = {"div", "canvas", "avg", 0};
@@ -127,16 +130,29 @@ void HeatMapNode::render(GLContext* pContext, const glm::mat4& transform)
     }
 }
 
+void HeatMapNode::setColorMap(const vector<string>& colormap)
+{
+    m_ColorMap = colormap;
+    m_OpacityMap.clear();
+    createColorRange(m_ValueRangeMin, m_ValueRangeMax);
+    m_ShouldPrerender = true;
+}
+
 const vector<string>& HeatMapNode::getColorMap() const
 {
     return m_ColorMap;
 }
 
-void HeatMapNode::setColorMap(const vector<string>& colormap)
+void HeatMapNode::setOpacityMap(const vector<float>& opacitymap)
 {
-    m_ColorMap = colormap;
+    m_OpacityMap = opacitymap;
     createColorRange(m_ValueRangeMin, m_ValueRangeMax);
     m_ShouldPrerender = true;
+}
+
+const vector<float>& HeatMapNode::getOpacityMap() const
+{
+    return m_OpacityMap;
 }
 
 void HeatMapNode::setPosns(const std::vector<glm::vec2>& posns)
@@ -176,6 +192,9 @@ void HeatMapNode::setMatrix(const vector<vector<float> >& matrix)
 
 void HeatMapNode::createColorRange(const float& min, const float& max)
 {
+    if (!m_OpacityMap.empty() && !(m_ColorMap.size() == m_OpacityMap.size())) {
+        throw avg::Exception(AVG_ERR_OUT_OF_RANGE, "colormap and opacitymap must have the same size.");
+    }
     float _min;
     float _max;
     float goes_over_zero = 0;
@@ -200,8 +219,11 @@ void HeatMapNode::createColorRange(const float& min, const float& max)
 
     for (int i=0; i < m_ColorMap.size(); ++i)
     {
-      float v = max - (i*range_steps);
-      m_ColorMapping[v] = Color(m_ColorMap.at( (m_ColorMap.size()-1) - i));
+        float v = max - (i*range_steps);
+        m_ColorMapping[v] = Color(m_ColorMap.at((m_ColorMap.size()-1) - i));
+        if (!m_OpacityMap.empty()) {
+            m_ColorMapping[v].setA(m_OpacityMap.at((m_ColorMap.size()-1) - i)*255);
+        }
     }
 }
 

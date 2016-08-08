@@ -28,7 +28,12 @@ BOOST_PYTHON_MODULE(heatmap)
       "colormap",
       make_function(&HeatMapNode::getColorMap, return_value_policy<copy_const_reference>()),
       &HeatMapNode::setColorMap
-    )
+      )
+    .add_property(
+      "opacitymap",
+      make_function(&HeatMapNode::getOpacityMap, return_value_policy<copy_const_reference>()),
+      &HeatMapNode::setOpacityMap
+      )
     .def("setPosns", &HeatMapNode::setPosns)
     .def("setMatrix", &HeatMapNode::setMatrix)
     ;
