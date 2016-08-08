@@ -141,8 +141,23 @@ void HeatMapNode::setColorMap(const vector<string>& colormap)
 
 void HeatMapNode::setPosns(const std::vector<glm::vec2>& posns)
 {
-  cout << "POSNS SET" << endl;
-  m_ShouldPrerender = true;
+    m_Matrix.clear();
+    for (int y=0; y<m_MapSize.y; ++y) {
+        m_Matrix.push_back(vector<float>(m_MapSize.x, 0.0f));
+    }
+    glm::vec2 viewportExtent = m_ViewportRangeMax - m_ViewportRangeMin;
+    for (auto pos: posns) {
+        glm::vec2 matPos = ((pos - m_ViewportRangeMin)/viewportExtent) * m_MapSize;
+        if (matPos.y >= 0 && matPos.y < m_MapSize.y && matPos.x >= 0 && matPos.x < m_MapSize.x) {
+            if (m_Matrix[matPos.y][matPos.x] < m_ValueRangeMax-1) {
+                m_Matrix[matPos.y][matPos.x]++;
+            }
+        }
+    }
+    if (getState() == NS_CANRENDER && !m_pTex) {
+        setupRender();
+    }
+    m_ShouldPrerender = true;
 }
 
 void HeatMapNode::setMatrix(const vector<vector<float> >& matrix)
