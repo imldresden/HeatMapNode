@@ -161,27 +161,8 @@ void HeatMapNode::setMatrix(const vector<vector<float> >& matrix)
 
 void HeatMapNode::createColorRange(const float& min, const float& max)
 {
-    float _min;
-    float _max;
-    float goes_over_zero = 0;
-    float is_nonchanging_range = 0;
-    if (min < 0)
-        _min = -min;
-    else
-        _min = min;
-
-    if (max < 0)
-        _max = -max;
-    else
-        _max = max;
-
-    if (min < 0 && max > 0)
-        goes_over_zero = 1;
-    else
-        is_nonchanging_range = 1;
-
-    float range_size = _min + _max - is_nonchanging_range;
-    float range_steps = range_size / (m_ColorMap.size() - goes_over_zero);
+    float range_size = std::abs(min - max);
+    float range_steps = range_size / m_ColorMap.size();
 
     for (int i=0; i < m_ColorMap.size(); ++i)
     {
