@@ -26,8 +26,8 @@ void HeatMapNode::registerType()
         .addArg( Arg<glm::vec2>("mapsize", glm::vec2(0,0), false, offsetof(HeatMapNode, m_MapSize)) )
         .addArg( Arg<float >("valuerangemin", 0.0, false, offsetof(HeatMapNode, m_ValueRangeMin)) )
         .addArg( Arg<float >("valuerangemax", 0.0, false, offsetof(HeatMapNode, m_ValueRangeMax)) )
-        .addArg( Arg<vector<string> >("colormap", cm, false, offsetof(HeatMapNode, m_ColorMap)) )
-        .addArg( Arg<vector<float> >("opacitymap", om, false, offsetof(HeatMapNode, m_OpacityMap)) )
+        .addArg( Arg<vector<string> >("colormap", cm, false, offsetof(HeatMapNode, m_ColorStrs)) )
+        .addArg( Arg<vector<float> >("opacitymap", om, false, offsetof(HeatMapNode, m_Opacities)) )
         ;
 
     const char* allowedParentNodeNames[] = {"div", "canvas", "avg", 0};
@@ -38,7 +38,7 @@ HeatMapNode::HeatMapNode(const ArgList& args, const string& sPublisherName) : Ra
 {
     args.setMembers(this);
     m_ShouldPrerender = false;
-    createColorRange(m_ValueRangeMin, m_ValueRangeMax);
+    createColorMap();
 }
 
 HeatMapNode::~HeatMapNode() {}
@@ -83,7 +83,6 @@ void HeatMapNode::preRender(const VertexArrayPtr& pVA, bool bIsParentActive, flo
         ScopeTimer timer(PrerenderProfilingZone);
 
         BitmapPtr pBmp(new Bitmap(getMatrixSize(m_Matrix), R8G8B8A8));
-
         int Stride = pBmp->getStride()/pBmp->getBytesPerPixel();
         IntPoint size = pBmp->getSize();
         Pixel32 * pLine = (Pixel32*)(pBmp->getPixels());
@@ -91,23 +90,17 @@ void HeatMapNode::preRender(const VertexArrayPtr& pVA, bool bIsParentActive, flo
         for (int y=0; y<size.y; ++y) {
             pPixel = pLine;
             for (int x=0; x<size.x; ++x) {
-                avg::Pixel32 c;
-                std::map<float, avg::Pixel32>::iterator low, prev;
-                float pos = m_Matrix[y][x];
-                pos = max(m_ValueRangeMin, min(pos, m_ValueRangeMax-1));
-                low = m_ColorMapping.lower_bound(pos);
-                if (low == m_ColorMapping.begin()) {
-                    c = m_ColorMapping[low->first];
-                } else {
-                    prev = low;
-                    --prev;
-                    if ((pos - prev->first) < (low->first - pos)) {
-                        c = m_ColorMapping[prev->first];
-                    } else {
-                        c = m_ColorMapping[low->first];
-                    }
-                }
+                float val = m_Matrix[y][x];
+                val = max(m_ValueRangeMin, min(val, m_ValueRangeMax));
+                float posInColors = ((val - m_ValueRangeMin)/(m_ValueRangeMax - m_ValueRangeMin)) * (m_Colors.size()-1);
+                int i = int(posInColors);
+                float ratio = posInColors - i;
+                Color c = Color::mix(m_Colors[i], m_Colors[i+1], 1-ratio);
+
                 *pPixel = c;
+                if (!m_Opacities.empty()) {
+                    pPixel->setA((m_Opacities[i]*(1-ratio) + m_Opacities[i+1]*ratio)*255);
+                }
                 pPixel++;
             }
             pLine += Stride;
@@ -131,33 +124,32 @@ void HeatMapNode::render(GLContext* pContext, const glm::mat4& transform)
 
 void HeatMapNode::setColorMap(const vector<string>& colormap)
 {
-    m_ColorMap = colormap;
-    m_OpacityMap.clear();
-    createColorRange(m_ValueRangeMin, m_ValueRangeMax);
+    m_ColorStrs = colormap;
+    m_Opacities.clear();
+    createColorMap();
     m_ShouldPrerender = true;
 }
 
 const vector<string>& HeatMapNode::getColorMap() const
 {
-    return m_ColorMap;
+    return m_ColorStrs;
 }
 
 void HeatMapNode::setOpacityMap(const vector<float>& opacitymap)
 {
-    m_OpacityMap = opacitymap;
-    createColorRange(m_ValueRangeMin, m_ValueRangeMax);
+    m_Opacities = opacitymap;
+    createColorMap();
     m_ShouldPrerender = true;
 }
 
 const vector<float>& HeatMapNode::getOpacityMap() const
 {
-    return m_OpacityMap;
+    return m_Opacities;
 }
 
 void HeatMapNode::setValueRangeMin(float min)
 {
     m_ValueRangeMin = min;
-    createColorRange(m_ValueRangeMin, m_ValueRangeMax);
     m_ShouldPrerender = true;
 }
 
@@ -169,7 +161,6 @@ float HeatMapNode::getValueRangeMin() const
 void HeatMapNode::setValueRangeMax(float max)
 {
     m_ValueRangeMax = max;
-    createColorRange(m_ValueRangeMin, m_ValueRangeMax);
     m_ShouldPrerender = true;
 }
 
@@ -211,21 +202,14 @@ void HeatMapNode::setMatrix(const vector<vector<float> >& matrix)
     m_ShouldPrerender = true;
 }
 
-void HeatMapNode::createColorRange(const float& min, const float& max)
+void HeatMapNode::createColorMap()
 {
-    if (!m_OpacityMap.empty() && !(m_ColorMap.size() == m_OpacityMap.size())) {
+    if (!m_Opacities.empty() && !(m_ColorStrs.size() == m_Opacities.size())) {
         throw avg::Exception(AVG_ERR_OUT_OF_RANGE, "colormap and opacitymap must have the same size.");
     }
-    float range_size = std::abs(min - max);
-    float range_steps = range_size / m_ColorMap.size();
-
-    for (int i=0; i < m_ColorMap.size(); ++i)
-    {
-        float v = max - (i*range_steps);
-        m_ColorMapping[v] = Color(m_ColorMap.at((m_ColorMap.size()-1) - i));
-        if (!m_OpacityMap.empty()) {
-            m_ColorMapping[v].setA(m_OpacityMap.at((m_ColorMap.size()-1) - i)*255);
-        }
+    m_Colors.clear();
+    for (auto colorStr: m_ColorStrs) {
+        m_Colors.push_back(colorStr);
     }
 }
 

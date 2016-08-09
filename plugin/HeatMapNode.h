@@ -5,6 +5,7 @@
 #include <api.h>
 
 #include <base/GLMHelper.h>
+#include <graphics/Color.h>
 #include <player/RasterNode.h>
 
 #include <boost/python/stl_iterator.hpp>
@@ -52,12 +53,12 @@ class HeatMapNode: public avg::RasterNode
                              glm::vec2  m_MapSize;
                                  float  m_ValueRangeMin;
                                  float  m_ValueRangeMax;
-              std::vector<std::string>  m_ColorMap;
-                    std::vector<float>  m_OpacityMap;
+              std::vector<std::string>  m_ColorStrs;
+               std::vector<avg::Color>  m_Colors;
+                    std::vector<float>  m_Opacities;
       std::vector<std::vector<float> >  m_Matrix;
-         std::map<float, avg::Pixel32>  m_ColorMapping;
 
-                                  void  createColorRange(const float& min, const float& max);
+                                  void  createColorMap();
                                   void  setupRender();
 };
 
