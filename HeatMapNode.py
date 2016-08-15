@@ -9,7 +9,7 @@ BLUR_CROP_VAL = 0.015
 
 class HeatMapNode(avg.DivNode):
 
-    def __init__(self, id=id, size=None, parent=None, colormap=None,valuerangemin=None, valuerangemax=None, overlay_src=None, blur_level=1, **kwargs):
+    def __init__(self, id=id, size=None, parent=None, colormap=None, valuerangemin=None, valuerangemax=None, overlay_src=None, blur_level=1, **kwargs):
         super(HeatMapNode, self).__init__(**kwargs)
 
         self.div_node_wrapper = avg.DivNode(
