@@ -67,7 +67,7 @@ class HeatMapNode(avg.DivNode):
         elif isinstance(data, avg.Point2D):
             self.heatmap_node.setPosns(data)
         else:
-            raise TypeError("Type of data must be list of list or avg.Point2D!")
+            raise TypeError("Type of data must be list of lists or avg.Point2D!")
 
     def set_value_range(self, min, max):
         self.heatmap_node.valuerangemin = min
