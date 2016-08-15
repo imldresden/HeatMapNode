@@ -5,8 +5,6 @@ from libavg import avg, app, player
 
 from HeatMapNode import HeatMapNode
 
-player.loadPlugin('heatmap')
-
 class HeatMapDiv(app.MainDiv):
 
     def onInit(self):
