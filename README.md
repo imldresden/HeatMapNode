@@ -84,6 +84,7 @@ If you are using the plugin directly, blurring does not work out of the box!
 ### CMake Issues:
 
 * If you get this error during _cmake ..__:
+
 ```
 -- Could NOT find Boost
   CMake Error: The following variables are used in this project, but they are set to NOTFOUND.
