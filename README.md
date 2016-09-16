@@ -13,10 +13,12 @@ __Build & Install:__
 ```
 git clone git@git.imld.de:lucas.recknagel/HeatMapNode.git
 cd HeatMapNode
+cd plugin
 mkdir build && cd build
 cmake ..
 make -j9
 make install # run as sudo if you´re not in a virtual env
+cd ..
 cd ..
 python setup.py install # run as sudo if you´re not in a virtual env
 ```
@@ -78,3 +80,18 @@ heatmap_node.setPosns(data)
 ```
 
 If you are using the plugin directly, blurring does not work out of the box!
+
+### CMake Issues:
+
+* If you get this error during _cmake ..__:
+```
+-- Could NOT find Boost
+  CMake Error: The following variables are used in this project, but they are set to NOTFOUND.
+  Please set them or make sure they are set and tested correctly in the CMake files:
+    Boost_INCLUDE_DIR (ADVANCED)
+      used as include directory in directory ...
+      used as include directory in directory ...
+      ...
+```
+
+Clear you cmake cache and try again.
