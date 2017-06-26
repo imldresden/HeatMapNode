@@ -5,6 +5,8 @@ HeatMapNode is derived from RasterNode and can render a Heatmap based on single 
 We have tested it under Linux and Mac.
 Also, there are no OS-specific features that we know of, so it should not be hard to get to run under windows.
 
+HeatMapNode was originally written by [Lucas Recknagel](https://github.com/lrecknagel). Thanks!
+
 ## Install Instructions
 
 __Dependencies:__
