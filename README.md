@@ -1,9 +1,11 @@
 # HeatMapNode
 
-The HeatMapNode is a libavg plugin.
-It is derived from RasterNode and can render a Heatmap based on single Points or a whole matrix.
+This project is a [libavg](https://www.libavg.de) plugin.
+HeatMapNode is derived from RasterNode and can render a Heatmap based on single Points or a whole matrix.
+We have tested it under Linux and Mac.
+Also, there are no OS-specific features that we know of, so it should not be hard to get to run under windows.
 
-## Installation Unix
+## Install Instructions
 
 __Dependencies:__
 * cmake
@@ -15,9 +17,9 @@ cd HeatMapNode/plugin
 mkdir build && cd build
 cmake ..
 make -j9
-make install # run as sudo if you´re not in a virtual env
+make install # run as sudo if you´re not using virtualenv
 cd ../..
-python setup.py install # run as sudo if you´re not in a virtual env
+python setup.py install # run as sudo if you´re not using virtualenv
 ```
 
 ## Usage
